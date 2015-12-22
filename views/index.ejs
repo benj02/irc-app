@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Coupon Form</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link rel="stylesheet" href="/css/bootstrap.cerulean.min.css">
+  <link rel="stylesheet" href="/css/spinner.css" type="text/css">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+
+<body>
+<div class="cover"></div>
+<div id="mainContainer" class="container">
+  <div id="boxesModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="boxesModalLabel" data-bind="modalVisible: showBoxes">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" aria-label="Close" data-bind="click: function(){this.showBoxes(false)}">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title" id="boxesModalLabel">Print Box Labels</h4>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="form-horizontal">
+              <div class="form-group">
+                <label for="inputPartWeight" class="col-sm-3 control-label">Single Part Weight</label>
+                <div class="col-sm-8">
+                  <input type="tel" class="form-control" id="inputPartWeight" placeholder="Single Part Weight" data-bind="value: partWeight, valueUpdate: 'input'">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="inputPartQty" class="col-sm-3 control-label">Order Qty</label>
+                <div class="col-sm-8">
+                  <input type="tel" class="form-control" id="inputPartQty" placeholder="Order Qty" data-bind="value: partQty, valueUpdate: 'input'">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="inputWorkOrder" class="col-sm-3 control-label">Work Order</label>
+                <div class="col-sm-8">
+                  <input disabled type="text" class="form-control" id="inputWorkOrder" placeholder="Work Order" data-bind="value: workOrderLabel, valueUpdate: 'input'">
+                </div>
+              </div>
+
+              <% if (!prod) { %>
+                <div class="form-group">
+                  <label for="result" class="col-sm-3 control-label"></label>
+                  <div class="col-sm-8" style="">
+                    <pre data-bind="text: JSON.stringify(boxResult())"></pre>
+                  </div>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div data-bind="visible: showPleaseWait" class="alert alert-info" style="text-align: left">
+            <strong>Please Wait</strong> Your labels are printing
+          </div>
+          <button type="submit" class="btn btn-success" data-bind="click: printLabels, visible: !showPleaseWait()">
+            <span class="glyphicon glyphicon-print"></span> Print Labels
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="confirmModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" data-bind="modalVisible: showConfirm">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" aria-label="Close" data-bind="click: hidePreview">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title" id="confirmModalLabel">Are you sure you want to write this?</h4>
+        </div>
+        <div class="modal-body">
+          <pre data-bind="text: filePreview"></pre>
+        </div>
+        <div class="modal-footer">
+          <div class="col-sm-7"></div>
+          <div class="col-sm-5">
+            <form data-bind="submit: write">
+              <div class="input-group">
+                <input id="inputPassword" type="tel" class="form-control" placeholder="Password" data-bind="value: password, valueUpdate: 'input'">
+                <span class="input-group-btn">
+                  <input type="submit" class="btn btn-danger" data-bind="enable: enableWrite" value="Write file" />
+                </span>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="header clearfix">
+    <nav>
+      <ul class="nav nav-pills pull-right">
+        <li role="presentation">
+          <a href="/scale" target="_blank">
+            Scale Viewer <span class="glyphicon glyphicon glyphicon-new-window"></span>
+          </a>
+        </li>
+        <li role="presentation">
+          <button class="btn btn-info" data-bind="click: toggleHelp, visible: !requestingHelp()">Get Help</button>
+          <button class="btn btn-warning" data-bind="click: toggleHelp, visible: requestingHelp()">Help is coming</button>
+        </li>
+      </ul>
+    </nav>
+    <h3>Coupon Form
+      <span id="connect" class="text-muted">
+        <div class="spinner-loader"></div>
+      </span>
+    </h3>
+  </div>
+
+  <div class="row">
+    <div class="form-horizontal">
+
+      <div class="alert alert-danger" role="alert" data-bind="text: flash, visible: flash"></div>
+      <div class="alert alert-info" role="alert" data-bind="text: infoFlash, visible: infoFlash"></div>
+
+      <div class="form-group">
+        <label for="inputMaterialDesignation" class="col-sm-4 control-label">Material Designation</label>
+        <div class="col-sm-8">
+          <input type="tel" class="form-control" id="inputMaterialDesignation" placeholder="Material Designation" data-bind="value: materialDesignation, valueUpdate: 'input'">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="inputStockThickness" class="col-sm-4 control-label">Stock Thickness</label>
+        <div class="col-sm-8">
+          <input type="tel" class="form-control" id="inputStockThickness" placeholder="Stock Thickness" data-bind="value: stockThickness, valueUpdate: 'input'">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="inputFinishThickness" class="col-sm-4 control-label">Finish Thickness</label>
+        <div class="col-sm-8">
+          <input type="tel" class="form-control" id="inputFinishThickness" placeholder="Finish Thickness" data-bind="value: finishThickness, valueUpdate: 'input'">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="inputStockWidth" class="col-sm-4 control-label">Stock Width</label>
+        <div class="col-sm-8">
+          <select class="form-control" id="inputStockWidth" data-bind="value: stockWidth">
+            <option selected disabled hidden value=""></option>
+            <option value="3.">3.</option>
+            <option value="6.">6.</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="inputFacemillTool" class="col-sm-4 control-label">Facemill Tool</label>
+        <div class="col-sm-8">
+          <select class="form-control" id="inputFacemillTool" data-bind="value: facemillTool">
+            <option selected disabled hidden value=''></option>
+            <option value="46.">46.</option>
+            <option value="48.">48.</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="inputWorkOrder" class="col-sm-4 control-label">Work Order</label>
+        <div class="col-sm-8">
+          <input type="tel" class="form-control" id="inputWorkOrder" placeholder="Work Order" data-bind="value: workOrder, valueUpdate: 'input'">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="inputWorkOrder" class="col-sm-4 control-label">Additional Options</label>
+        <div class="col-sm-8">
+          <div class="face-button">
+            <check-button params="value: faub, text: 'FAUB'"></check-button>
+          </div>
+          <div class="face-button">
+            <check-button params="value: clad, text: 'CLAD'"></check-button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-4 control-label">Faces to Run</label>
+        <div class="col-sm-8">
+          <check-button params="value: face1, text: 'Face 1'"></check-button>
+          <check-button params="value: face2, text: 'Face 2'"></check-button>
+          <check-button params="value: face3, text: 'Face 3'"></check-button>
+          <check-button params="value: face4, text: 'Face 4'"></check-button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="col-sm-offset-4 col-sm-8">
+          <button type="submit" class="btn btn-default" data-bind="click: writeConfirm, enable: outdated">Write File</button>
+          <button class="btn btn-default"
+             onClick="viewmodel.showBoxes(true); return false;">
+            Print Labels
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Current file contents</h3>
+      </div>
+      <div class="panel-body">
+        <pre data-bind="text: file"></pre>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <span class="pull-right">
+      <a href="/preload">Preload Form</a>
+    </span>
+    <span>Last updated
+      <span data-bind="text: updatedAgo"></span>
+    </span>
+  </footer>
+</div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/bootstrap.min.js"></script>
+  <script src="/js/knockout.min.js"></script>
+  <script src="/js/moment.min.js"></script>
+  <script src="/js/round.polyfill.js"></script>
+  <script src="/js/dist/button.js"></script>
+  <script src="/js/dist/index.js"></script>
+</body>
+</html>
